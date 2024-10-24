@@ -1,15 +1,15 @@
 import { Body, Controller, Get, Param, Post, Put, Delete } from "@nestjs/common";
 import { User } from "src/entities/user.entity";
 import { UserCreateReq } from "./dto/user-create.req";
-import { UsersService } from "./users.service";
+import { UserService } from "./user.service";
 
 @Controller('users')
-export class UsersController {
+export class UserController {
 
-    constructor(private readonly userService: UsersService) {}
+    constructor(private readonly userService: UserService) {}
 
     @Post()
-    createUsers(@Body() req: UserCreateReq) {
+    async createUsers(@Body() req: UserCreateReq): Promise<User> {
         return this.userService.create(req);
     }
 

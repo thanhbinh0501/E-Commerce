@@ -4,13 +4,14 @@ import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { UserCreateReq } from './dto/user-create.req';
 import { Role } from 'src/entities/role.entity';
-import { RoleService } from '../roles/role.service';
+import { RoleService } from '../role/role.service';
+import { PasswordUtil } from 'src/utils/password.util';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private userRepository: Repository<User>,
 
     private readonly roleService: RoleService,
   ) {}
@@ -21,20 +22,16 @@ export class UsersService {
     const rolesEntity: Role[] = await this.roleService.getByNames(roles);
     const userData = {
       email,
-      password,
+      password: await PasswordUtil.generatePassword(password),
       name,
       phoneNumber,
       roles: rolesEntity,
     } as User;
-    return this.usersRepository.save(userData);
+    return this.userRepository.save(userData);
   }
 
   findAll(): Promise<User[]> {
-    return this.usersRepository.find();
-  }
-
-  findOne(id: number): Promise<User> {
-    return this.usersRepository.findOneBy({ id });
+    return this.userRepository.find();
   }
 
   // async update(id: number, updateUserDto: UserCreateReq): Promise<User> {
@@ -43,6 +40,12 @@ export class UsersService {
   // }
 
   async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+    await this.userRepository.delete(id);
+  }
+
+  async getByEmail(email: string) {
+    return this.userRepository.findOneBy({
+      email,
+    })
   }
 }
